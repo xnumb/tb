@@ -296,11 +296,19 @@ func Send(c tele.Context, p SendParams, opts ...any) error {
 	content, opts2 := buildSend(&p, opts...)
 	// opts2 = append(opts2, tele.IgnoreThread) // maybe panic
 	if p.IsEdit {
-		return c.Edit(content, opts2...)
+		//return c.Edit(content, opts2...)
+		_, err := c.Bot().Edit(c.Message(), content, opts2...)
+		return err
 	} else if p.IsReply {
-		return c.Reply(content, opts2...)
+		//return c.Reply(content, opts2...)
+		_, err := c.Bot().Reply(c.Message(), content, opts2...)
+		return err
 	} else {
-		return c.Send(content, opts2...)
+		//return c.Send(content, opts2...)
+		_, err := c.Bot().Send(&tele.Chat{
+			ID: c.Chat().ID,
+		}, content, opts2...)
+		return err
 	}
 }
 
@@ -374,7 +382,7 @@ func SendAlbumTo(c tele.Context, cid int64, info, medias string, opts ...any) ([
 
 func SendErr(c tele.Context, err error) error {
 	log.Err(err)
-	return c.Send(emj.Bell + " 操作异常: " + err.Error())
+	return SendText(c, emj.Bell+" 操作异常: "+err.Error())
 }
 
 func Alert(c tele.Context, text string) error {
