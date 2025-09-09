@@ -2,12 +2,15 @@ package fetch
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
-	"tb2/log"
-	"tb2/tberr"
+
+	"github.com/xnumb/tb/log"
 )
+
+var ErrRequestNotFound = errors.New("请求不存在")
 
 type Params map[string]any
 type Header map[string]string
@@ -21,9 +24,8 @@ func (b *Body) Parse(obj any) error {
 	err := json.Unmarshal(*b, obj)
 	if err != nil {
 		log.Err(err, "obj", obj)
-		return err
 	}
-	return nil
+	return err
 }
 
 func Post(url string, p Params, h Header) (Body, error) {
@@ -64,7 +66,7 @@ func do(method, url string, p Params, h Header) (Body, error) {
 		return nil, err
 	}
 	if req == nil {
-		return nil, tberr.ErrRequestNotFound
+		return nil, ErrRequestNotFound
 	}
 	req.Header.Set("Content-Type", "application/json")
 	for hk, hv := range h {
@@ -75,14 +77,11 @@ func do(method, url string, p Params, h Header) (Body, error) {
 		return nil, err
 	}
 
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Err(err, "http.do close error")
-		}
-	}(res.Body)
+	defer res.Body.Close()
 
-	body, _ := io.ReadAll(res.Body)
-
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
 	return body, nil
 }
