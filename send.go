@@ -294,7 +294,7 @@ func buildAlbum(info, medias string) tele.Album {
 
 func Send(c tele.Context, p SendParams, opts ...any) error {
 	content, opts2 := buildSend(&p, opts...)
-	opts2 = append(opts2, tele.IgnoreThread)
+	// opts2 = append(opts2, tele.IgnoreThread) // maybe panic
 	if p.IsEdit {
 		return c.Edit(content, opts2...)
 	} else if p.IsReply {
