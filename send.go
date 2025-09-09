@@ -373,7 +373,7 @@ func SendAlbumTo(c tele.Context, cid int64, info, medias string, opts ...any) ([
 }
 
 func SendErr(c tele.Context, err error) error {
-	log.ErrSkip(err, 3)
+	log.Err(err)
 	return c.Send(emj.Bell + " 操作异常: " + err.Error())
 }
 

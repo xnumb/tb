@@ -129,21 +129,13 @@ func Debug(ps ...any) {
 }
 
 func handleErr(err error, logType string, ps ...any) {
-	msg := "nil"
 	if err != nil {
-		msg = err.Error()
+		ps = append([]any{err.Error(), nil}, ps...)
 	}
-	ps = append([]any{msg, nil}, ps...)
 	printLog(logType, ps...)
 }
 
 func Err(err error, ps ...any) {
-	handleErr(err, "ERR", ps...)
-}
-
-func ErrSkip(err error, skip int, ps ...any) {
-	// Note: with stack traces, ErrSkip's skip is less meaningful, but we preserve the signature.
-	// The filtering logic is now primary. We'll just call the base handler.
 	handleErr(err, "ERR", ps...)
 }
 
@@ -154,11 +146,18 @@ func Fatal(err error, ps ...any) {
 
 func printLog(logType string, ps ...any) {
 	t := utils.GetNow()
-	if len(ps)%2 == 1 {
-		ps = append(ps, nil)
-	}
+
 	var infos []string
-	for i := 0; i < len(ps); i += 2 {
+	startIndex := 0
+
+	// If there's an odd number of args, the first is a standalone message
+	if len(ps)%2 == 1 {
+		infos = append(infos, fmt.Sprintf("%+v", ps[0]))
+		startIndex = 1
+	}
+
+	// Process the rest as key-value pairs
+	for i := startIndex; i < len(ps); i += 2 {
 		key := ps[i]
 		val := ps[i+1]
 		if val == nil {
