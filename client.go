@@ -119,37 +119,19 @@ func (t *Tbot) Start() {
 }
 
 func (t *Tbot) SendTo(cid int64, p SendParams, opts ...any) (*tele.Message, error) {
-	content, opts2 := buildSend(&p, opts...)
-	return t.client.Send(&tele.Chat{
-		ID: cid,
-	}, content, opts2...)
+	return sendTo(t.client, cid, p, opts...)
 }
+
 func (t *Tbot) SendToTopic(cid int64, topicId int, p SendParams, opts ...any) (*tele.Message, error) {
-	content, opts2 := buildSend(&p, opts...)
-	opts2 = append(opts2, tele.SendOptions{
-		ThreadID: topicId,
-	})
-	return t.client.Send(&tele.Chat{
-		ID: cid,
-	}, content, opts2...)
+	return sendToTopic(t.client, cid, topicId, p, opts...)
 }
 
 func (t *Tbot) SendToUsername(username string, p SendParams, opts ...any) (*tele.Message, error) {
-	chat, err := t.client.ChatByUsername(username)
-	if err != nil {
-		return nil, err
-	}
-	content, opts2 := buildSend(&p, opts...)
-	return t.client.Send(&tele.Chat{
-		ID: chat.ID,
-	}, content, opts2...)
+	return sendToUsername(t.client, username, p, opts...)
 }
 
 func (t *Tbot) SendAlbum(cid int64, info, medias string, opts ...any) ([]tele.Message, error) {
-	as := buildAlbum(info, medias)
-	return t.client.SendAlbum(&tele.Chat{
-		ID: cid,
-	}, as, opts...)
+	return sendAlbumTo(t.client, cid, info, medias, opts...)
 }
 
 func (t *Tbot) DelMessageFrom(chatId int64, messageId int) error {

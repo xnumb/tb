@@ -44,7 +44,7 @@ func (m *AlbumManager) Handle(c tele.Context, fn func(Album)) {
 	if msg.Photo != nil {
 		fid = msg.Photo.FileID
 	} else if msg.Video != nil {
-		fid = "v_" + msg.Video.FileID // 使用前缀区分，比纯粹的"_"更清晰
+		fid = "_" + msg.Video.FileID // 使用前缀区分，比纯粹的"_"更清晰
 	} else {
 		return
 	}

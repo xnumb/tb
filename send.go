@@ -232,9 +232,9 @@ func buildSend(p *SendParams, opts ...any) (any, []any) {
 		photo := &tele.Photo{
 			Caption: p.Info,
 		}
-		if strings.HasPrefix(p.Pic, "https://") {
+		if strings.HasPrefix(p.Pic, "https://") { // url
 			photo.File = tele.FromURL(p.Pic)
-		} else if strings.Contains(p.Pic, ".") { // url
+		} else if strings.Contains(p.Pic, ".") { // file
 			photo.File = tele.FromDisk(p.Pic)
 		} else { // fileId
 			photo.FileID = p.Pic
@@ -244,9 +244,9 @@ func buildSend(p *SendParams, opts ...any) (any, []any) {
 		video := &tele.Video{
 			Caption: p.Info,
 		}
-		if strings.HasPrefix(p.Pic, "https://") {
+		if strings.HasPrefix(p.Pic, "https://") { // url
 			video.File = tele.FromURL(p.Vod)
-		} else if strings.Contains(p.Pic, ".") { // url
+		} else if strings.Contains(p.Pic, ".") { // file
 			video.File = tele.FromDisk(p.Vod)
 		} else { // fileId
 			video.FileID = p.Vod
@@ -317,35 +317,59 @@ func ReplyText(c tele.Context, text string) error {
 	})
 }
 
-func SendTo(c tele.Context, cid int64, p SendParams, opts ...any) (*tele.Message, error) {
+func sendTo(bot tele.API, cid int64, p SendParams, opts ...any) (*tele.Message, error) {
 	content, opts2 := buildSend(&p, opts...)
-	return c.Bot().Send(&tele.Chat{
-		ID: cid,
-	}, content, opts2...)
-}
-func SendToTopic(c tele.Context, cid int64, topicId int, p SendParams, opts ...any) (*tele.Message, error) {
-	content, opts2 := buildSend(&p, opts...)
-	opts2 = append(opts2, &tele.SendOptions{
-		ThreadID: topicId,
-	})
-	return c.Bot().Send(&tele.Chat{
+	return bot.Send(&tele.Chat{
 		ID: cid,
 	}, content, opts2...)
 }
 
-func SendToUsername(c tele.Context, username string, p SendParams, opts ...any) (*tele.Message, error) {
-	chat, err := c.Bot().ChatByUsername(username)
+func SendTo(c tele.Context, cid int64, p SendParams, opts ...any) (*tele.Message, error) {
+	return sendTo(c.Bot(), cid, p, opts...)
+}
+
+func sendToTopic(bot tele.API, cid int64, topicId int, p SendParams, opts ...any) (*tele.Message, error) {
+	content, opts2 := buildSend(&p, opts...)
+	opts2 = append(opts2, tele.SendOptions{
+		ThreadID: topicId,
+	})
+	return bot.Send(&tele.Chat{
+		ID: cid,
+	}, content, opts2...)
+}
+
+func SendToTopic(c tele.Context, cid int64, topicId int, p SendParams, opts ...any) (*tele.Message, error) {
+	return sendToTopic(c.Bot(), cid, topicId, p, opts...)
+}
+
+func sendToUsername(bot tele.API, username string, p SendParams, opts ...any) (*tele.Message, error) {
+	chat, err := bot.ChatByUsername(username)
 	if err != nil {
 		return nil, err
 	}
 	content, opts2 := buildSend(&p, opts...)
-	return c.Bot().Send(&tele.Chat{
+	return bot.Send(&tele.Chat{
 		ID: chat.ID,
 	}, content, opts2...)
 }
-func SendAlbum(c tele.Context, info, medias string, opts ...any) ([]tele.Message, error) {
+
+func SendToUsername(c tele.Context, username string, p SendParams, opts ...any) (*tele.Message, error) {
+	return sendToUsername(c.Bot(), username, p, opts...)
+}
+
+func sendAlbumTo(bot tele.API, cid int64, info, medias string, opts ...any) ([]tele.Message, error) {
 	as := buildAlbum(info, medias)
-	return c.Bot().SendAlbum(c.Sender(), as, opts...)
+	return bot.SendAlbum(&tele.Chat{
+		ID: cid,
+	}, as, opts...)
+}
+
+func SendAlbum(c tele.Context, info, medias string, opts ...any) ([]tele.Message, error) {
+	return sendAlbumTo(c.Bot(), c.Sender().ID, info, medias, opts...)
+}
+
+func SendAlbumTo(c tele.Context, cid int64, info, medias string, opts ...any) ([]tele.Message, error) {
+	return sendAlbumTo(c.Bot(), cid, info, medias, opts...)
 }
 
 func SendErr(c tele.Context, err error) error {
