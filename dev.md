@@ -1,0 +1,1 @@
+- 将googleAuth做成类似于cron的文档说明
