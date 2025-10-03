@@ -59,6 +59,31 @@ func findConsumerRoot(firstFrameFile string) {
 	}
 }
 
+// isTBLibraryFile checks if a file belongs to the tb library
+// This works for both local development and go mod cache scenarios
+func isTBLibraryFile(filePath string) bool {
+	// Check for local development path (when projectRoot is set)
+	if projectRoot != "" && strings.HasPrefix(filePath, projectRoot) {
+		return true
+	}
+
+	// Check for go mod cache path pattern
+	// Pattern: /path/to/go/pkg/mod/github.com/xnumb/tb@version/
+	if strings.Contains(filePath, "github.com/xnumb/tb@") {
+		return true
+	}
+
+	// Alternative pattern for go mod cache (without @version)
+	if strings.Contains(filePath, "github.com/xnumb/tb/") {
+		// Additional check to ensure it's actually in a mod cache or vendor directory
+		if strings.Contains(filePath, "/pkg/mod/") || strings.Contains(filePath, "/vendor/") {
+			return true
+		}
+	}
+
+	return false
+}
+
 func getFilteredStackTrace() string {
 	projectRootOnce.Do(findProjectRoot) // Ensure tb projectRoot is initialized
 
@@ -78,8 +103,9 @@ func getFilteredStackTrace() string {
 			break
 		}
 
-		// Skip frames from the logging package itself
-		if projectRoot != "" && strings.HasPrefix(frame.File, projectRoot) {
+		// Skip frames from the tb library itself
+		// This covers both local development and go mod cache scenarios
+		if isTBLibraryFile(frame.File) {
 			continue
 		}
 
