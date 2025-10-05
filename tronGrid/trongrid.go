@@ -111,6 +111,34 @@ func (c *Client) GetNowBlock() (int64, Txs, error) {
 	return res.BlockHeader.RawData.Number, txs, nil
 }
 
+func (c *Client) GetBlockByNum(num int64) (*Block, error) {
+	res := &Block{}
+	body, err := fetch.Post(c.api+"wallet/getblockbynum", fetch.Params{
+		"num": num,
+	}, c.header)
+	if err != nil {
+		return nil, err
+	}
+	if err = body.Parse(&res); err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (c *Client) GetTransactionInfoById(txId string) (*TransactionInfo, error) {
+	res := &TransactionInfo{}
+	body, err := fetch.Post(c.api+"wallet/gettransactioninfobyid", fetch.Params{
+		"value": txId,
+	}, c.header)
+	if err != nil {
+		return nil, err
+	}
+	if err = body.Parse(&res); err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (c *Client) CheckAddrFmt(addr string) (bool, error) {
 	res := struct {
 		Result  bool   `json:"result"`

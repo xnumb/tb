@@ -68,3 +68,13 @@ type Block struct {
 	} `json:"block_header"`
 	Transactions []*Transaction `json:"transactions"`
 }
+
+type TransactionInfo struct {
+	Id             string `json:"id"`
+	Fee            int    `json:"fee"`
+	BlockNumber    int64  `json:"blockNumber"`
+	BlockTimeStamp int64  `json:"blockTimeStamp"`
+	Receipt        struct {
+		NetFee int `json:"net_fee"`
+	} `json:"receipt"`
+}
