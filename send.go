@@ -103,6 +103,10 @@ func (sp *SendParams) SetMedia(text, mediaId string, btns string, needDelBtn boo
 	return true
 }
 
+func BuildSend(p *SendParams, opts ...any) (any, []any) {
+	return buildSend(p, opts...)
+}
+
 func buildSend(p *SendParams, opts ...any) (any, []any) {
 	markup := &tele.ReplyMarkup{}
 	if p.RawMarkup != nil {
@@ -262,6 +266,10 @@ func buildSend(p *SendParams, opts ...any) (any, []any) {
 		opts2 = append(opts2, opts...)
 	}
 	return content, opts2
+}
+
+func BuildAlbum(info, medias string) tele.Album {
+	return buildAlbum(info, medias)
 }
 
 func buildAlbum(info, medias string) tele.Album {
