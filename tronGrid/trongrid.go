@@ -76,7 +76,7 @@ func (c *Client) GetUsdtHistory(expMin int64, count int, addr string, direct int
 	} else if direct == 2 {
 		directParam = "&only_from=true"
 	}
-	path := "v1/accounts/" + addr + "/transactions/trc20?limit=" + to.S(count) + "&only_confirmed=true&min_timestamp=" + ts + "&contract_address=" + c.usdtContract + directParam
+	path := "v1/accounts/" + addr + "/transactions/trc20?limit=" + to.S(count) + "&min_timestamp=" + ts + "&contract_address=" + c.usdtContract + directParam
 	body, err := fetch.Get(c.api+path, c.header)
 	if err != nil {
 		return nil, err
